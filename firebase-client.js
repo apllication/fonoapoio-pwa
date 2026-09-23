@@ -34,3 +34,15 @@ export async function login(email,password){ if(!auth) throw new Error("Firebase
 export async function register(email,password){ if(!auth) throw new Error("Firebase não configurado."); return createUserWithEmailAndPassword(auth,email,password); }
 export async function logout(){ if(auth) await signOut(auth); }
 
+
+
+function requireDatabaseUser(){
+  const user=currentUser();
+  if(!db || !user) throw new Error("Usuário não autenticado.");
+  return user;
+}
+
+export async function ensureProfessionalProfile(){
+  const user=requireDatabaseUser();
+  await setDoc(doc(db,"users",user.uid),{email:user.email||"",role:"professional",updatedAt:serverTimestamp()},{merge:true});
+}

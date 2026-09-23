@@ -1,3 +1,36 @@
+import { initFirebase, currentUser, observeAuth, login, register, logout } from "./firebase-client.js";
+
+let fonoFirebaseReady=false;
+let fonoAuthUser=null;
+let fonoAuthInitialized=false;
+
+async function setupFirebaseAuth(){
+  if(fonoAuthInitialized) return;
+  fonoAuthInitialized=true;
+  const result=await initFirebase();
+  fonoFirebaseReady=result.configured;
+  if(!fonoFirebaseReady) return;
+  observeAuth(user=>{ fonoAuthUser=user||null; });
+}
+
+function authScreen(message=""){
+  app.innerHTML='<section class="screen"><button class="back" data-home>← Voltar</button><div class="card form-card"><span class="eyebrow">Acesso profissional</span><h1>Área da fonoaudióloga</h1><p>Entre com seu e-mail e senha. O acesso profissional é separado da jornada da criança.</p><label>E-mail<input id="authEmail" type="email" autocomplete="email" placeholder="seu@email.com"></label><label>Senha<input id="authPassword" type="password" autocomplete="current-password" placeholder="Sua senha"></label><button class="primary" data-login>Entrar</button><button class="secondary" data-register>Criar acesso profissional</button><div id="authStatus" class="save-status" aria-live="polite">${message}</div><p class="muted">Os dados reais só devem ser usados depois que o Firebase estiver configurado e as regras de segurança forem publicadas.</p></div></section>';
+  bindScreen();
+  const status=document.querySelector("#authStatus");
+  const credentials=()=>({email:document.querySelector("#authEmail").value.trim(),password:document.querySelector("#authPassword").value});
+  document.querySelector("[data-login]").onclick=async()=>{
+    const {email,password}=credentials();
+    if(!email||password.length<6){status.textContent="Informe um e-mail e uma senha com pelo menos 6 caracteres.";return;}
+    status.textContent="Entrando...";
+    try{await login(email,password);showProfessional();}catch(error){status.textContent="Não foi possível entrar. Confira o e-mail e a senha.";console.warn(error);}
+  };
+  document.querySelector("[data-register]").onclick=async()=>{
+    const {email,password}=credentials();
+    if(!email||password.length<6){status.textContent="Informe um e-mail e uma senha com pelo menos 6 caracteres.";return;}
+    status.textContent="Criando acesso...";
+    try{await register(email,password);showProfessional();}catch(error){status.textContent="Não foi possível criar o acesso. Verifique se E-mail/Senha está habilitado no Firebase.";console.warn(error);}
+  };
+}
 const app=document.querySelector("#app");
 const installBtn=document.querySelector("#installBtn");
 let deferredPrompt=null;
@@ -263,3 +296,26 @@ function showProfessional(){
 }
 
 showHome();
+
+const originalProfessionalScreen=professionalScreen;
+function professionalScreen(){
+  const base=originalProfessionalScreen();
+  const user=currentUser();
+  const account=user ? '<div class="card"><strong>🔐 Acesso seguro</strong><p>Conectada como <b>'+user.email+'</b>.</p><button class="secondary" data-logout>Sair</button></div>' : '';
+  return account+base;
+}
+const originalBindScreen=bindScreen;
+function bindScreen(){
+  originalBindScreen();
+  const logoutButton=document.querySelector("[data-logout]");
+  if(logoutButton) logoutButton.onclick=async()=>{await logout();showHome();};
+}
+const originalShowProfessional=showProfessional;
+async function showProfessional(){
+  await setupFirebaseAuth();
+  if(!fonoFirebaseReady){authScreen("O Firebase ainda não foi configurado. Por enquanto, o projeto permanece em modo demonstração.");return;}
+  if(!currentUser()){authScreen();return;}
+  originalShowProfessional();
+  bindScreen();
+}
+setupFirebaseAuth();

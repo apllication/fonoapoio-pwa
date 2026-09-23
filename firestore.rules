@@ -1,0 +1,64 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function isProfessional() {
+      return signedIn() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "professional";
+    }
+
+    match /users/{uid} {
+      allow read: if isOwner(uid);
+      allow create: if isOwner(uid) &&
+        request.resource.data.role == "professional";
+      allow update: if isOwner(uid) &&
+        request.resource.data.role == resource.data.role;
+      allow delete: if false;
+    }
+
+    match /children/{childId} {
+      allow create: if isProfessional() &&
+        request.resource.data.professionalId == request.auth.uid;
+      allow read, update, delete: if isProfessional() &&
+        resource.data.professionalId == request.auth.uid;
+    }
+
+    match /children/{childId}/journeys/{journeyId} {
+      allow read, write: if isProfessional() &&
+        get(/databases/$(database)/documents/children/$(childId)).data.professionalId == request.auth.uid;
+    }
+
+    match /children/{childId}/observations/{observationId} {
+      allow read, create: if isProfessional() &&
+        get(/databases/$(database)/documents/children/$(childId)).data.professionalId == request.auth.uid;
+      allow update: if isProfessional() &&
+        get(/databases/$(database)/documents/children/$(childId)).data.professionalId == request.auth.uid;
+      allow delete: if false;
+    }
+
+    match /children/{childId}/voiceRecords/{recordId} {
+      allow read, create: if isProfessional() &&
+        get(/databases/$(database)/documents/children/$(childId)).data.professionalId == request.auth.uid;
+      allow update: if isProfessional() &&
+        get(/databases/$(database)/documents/children/$(childId)).data.professionalId == request.auth.uid;
+      allow delete: if false;
+    }
+
+    match /activities/{activityId} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

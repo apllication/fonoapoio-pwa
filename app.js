@@ -247,6 +247,23 @@ function reviewVoice(index){
   professionalScreen();
 }
 
+const assessmentModules=[["anamnese","Anamnese"],["audicao","Audição"],["receptiva","Linguagem receptiva"],["expressiva","Linguagem expressiva"],["fala","Fala / sons da fala"],["fonologica","Consciência fonológica"],["leitura","Leitura e escrita"],["social","Comunicação social"],["fluencia","Fluência"],["voz","Voz"],["orofacial","Motricidade/orofacial"],["alimentacao","Alimentação/deglutição"],["sintese","Síntese clínica"],["encaminhamentos","Encaminhamentos"],["plano","Plano terapêutico e reavaliação"]];
+let assessmentData={};
+function assessmentScreen(){
+ const cards=assessmentModules.map(m=>'<button class="card assessment-module" data-assessment-module="'+m[0]+'"><strong>'+m[1]+'</strong><small>Registrar observações e evidências</small></button>').join("");
+ return '<section class="screen"><button class="back" data-professional-home>← Área profissional</button><span class="eyebrow">Avaliação profissional</span><h1>Avaliação estruturada</h1><p>Registro de apoio para a fonoaudióloga. Não substitui testes padronizados, seus manuais ou julgamento clínico.</p><div class="assessment-grid">'+cards+'</div></section>';
+}
+function assessmentModuleScreen(id){
+ const m=assessmentModules.find(x=>x[0]===id); if(!m)return assessmentScreen();
+ const d=assessmentData[id]||{};
+ return '<section class="screen"><button class="back" data-assessment-home>← Voltar</button><span class="eyebrow">Domínio de avaliação</span><h1>'+m[1]+'</h1><p>Registre somente o que foi observado ou documentado.</p><label>Resultado / observação<textarea id="assessmentObservation" rows="7" placeholder="Descreva a evidência observada...">'+(d.observation||"")+'</textarea></label><label>Interpretação clínica<textarea id="assessmentInterpretation" rows="5" placeholder="Interpretação da fono...">'+(d.interpretation||"")+'</textarea></label><label>Conduta / próximos passos<textarea id="assessmentPlan" rows="4" placeholder="Conduta definida...">'+(d.plan||"")+'</textarea></label><button class="primary" data-assessment-save="'+id+'">Salvar domínio</button><div id="assessmentSaveStatus" class="save-status"></div></section>';
+}
+function bindAssessment(){
+ document.querySelectorAll("[data-assessment-module]").forEach(b=>b.onclick=()=>{app.innerHTML=assessmentModuleScreen(b.dataset.assessmentModule);bindScreen();});
+ document.querySelector("[data-professional-home]")?.addEventListener("click",showProfessional);
+ document.querySelector("[data-assessment-home]")?.addEventListener("click",()=>{app.innerHTML=assessmentScreen();bindScreen();});
+ document.querySelector("[data-assessment-save]")?.addEventListener("click",()=>{const id=document.querySelector("[data-assessment-save]").dataset.assessmentSave;assessmentData[id]={observation:document.querySelector("#assessmentObservation").value,interpretation:document.querySelector("#assessmentInterpretation").value,plan:document.querySelector("#assessmentPlan").value};document.querySelector("#assessmentSaveStatus").textContent="✓ Salvo nesta demonstração.";});
+}
 function professionalScreen(){
   const list=children.map((c,i)=>'<div class="card patient"><div class="patient-avatar">🧒</div><div class="patient-info"><strong>'+c.name+'</strong><small>'+c.age+' · Meta: '+c.goal+'</small></div><button class="secondary" data-patient="'+i+'">Abrir perfil</button></div>').join("");
   const assessmentButton="<button class=\"primary\" data-assessment-home>Abrir avaliação estruturada</button>";
@@ -260,6 +277,8 @@ function professionalScreen(){
 function bindScreen(){
   document.querySelectorAll("[data-home]").forEach(b=>b.onclick=showHome);
   document.querySelectorAll("[data-professional]").forEach(b=>showProfessional);
+  bindAssessment();
+  document.querySelector("[data-assessment-home]")?.addEventListener("click",()=>{app.innerHTML=assessmentScreen();bindScreen();});
   document.querySelectorAll("[data-role]").forEach(b=>b.onclick=()=>b.dataset.role==="child"?showChild():showProfessional());
   document.querySelectorAll("[data-patient]").forEach(b=>b.onclick=()=>childProfile(Number(b.dataset.patient)));
   document.querySelectorAll("[data-review]").forEach(b=>b.onclick=()=>reviewVoice(Number(b.dataset.review)));

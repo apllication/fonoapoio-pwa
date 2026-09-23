@@ -78,8 +78,8 @@ const activities=[
 ];
 
 let children=[
-  {name:"Ana (demo)",age:"5 anos",goal:"Linguagem e nomeação",readingLevel:"nao-le",assigned:["Diga o nome","Turnos de conversa"]},
-  {name:"Pedro (demo)",age:"7 anos",goal:"Consciência fonológica",readingLevel:"comecando",assigned:["Rimas"]}
+  {name:"Ana (demo)",age:"5 anos",goal:"Linguagem e nomeação",readingLevel:"nao-le",accessCode:"1111",assigned:["Nomeando animais","Minha vez, sua vez"]},
+  {name:"Pedro (demo)",age:"7 anos",goal:"Consciência fonológica",readingLevel:"comecando",accessCode:"2222",assigned:["Rimas"]}
 ];
 
 let childProgress=0;
@@ -91,6 +91,7 @@ let speechRecognition=null;
 let lastRecording=null;
 let voiceRecords=[];
 let activeChildIndex=0;
+let childJourneyActivities=[];
 let observationDrafts={};
 
 function normalizeSpeech(text){
@@ -152,7 +153,7 @@ async function toggleRecording(){
 }
 
 function saveVoiceRecord(transcript){
-  const current=activities[childProgress%activities.length];
+  const current=childJourneyActivities[childProgress];
   voiceRecords.unshift({
     childIndex:activeChildIndex,
     activity:current.title,
@@ -166,7 +167,7 @@ function saveVoiceRecord(transcript){
 function analyzeVoice(){
   const box=document.querySelector("#voiceAnalysis");
   if(!box||!lastRecording)return;
-  const a=activities[childProgress%activities.length];
+  const a=childJourneyActivities[childProgress];
   box.hidden=false;
   box.innerHTML='<strong>🔎 Análise preliminar</strong><p>Áudio gravado: <b>'+lastRecording.duration+'s</b>. A interpretação clínica deve ser feita pela fonoaudióloga.</p>';
   if(!speechSupported()){
@@ -206,12 +207,31 @@ function homeScreen(){
   return '<section class="hero"><span class="eyebrow">Projeto gratuito</span><h1>FonoApoio UBS</h1><p>Um espaço simples para aproximar <b>criança e fonoaudióloga</b> por meio de atividades planejadas.</p></section><section class="roles" aria-labelledby="roles-title"><h2 id="roles-title">Escolha seu acesso</h2><button class="role-card role-child" data-role="child"><span>🧒</span><div><strong>Sou criança</strong><small>Minha Jornada de atividades</small></div></button><button class="role-card role-pro" data-role="professional"><span>🩺</span><div><strong>Sou fonoaudióloga</strong><small>Planejar, acompanhar e registrar</small></div></button></section><section class="notice"><strong>Um projeto de apoio</strong><p>O aplicativo não diagnostica e não substitui avaliação, atendimento ou decisão clínica da profissional.</p></section>';
 }
 
+function childAccessScreen(message=""){
+  app.innerHTML='<section class="screen"><button class="back" data-home>← Voltar</button><div class="card form-card"><span class="eyebrow">Acesso da criança</span><h1>Quem vai fazer a jornada?</h1><p>Digite seu nome e o código de acesso entregue pela fono.</p><label>Nome da criança<input id="childAccessName" maxlength="100" autocomplete="off" placeholder="Seu nome"></label><label>Código de acesso<input id="childAccessCode" type="password" inputmode="numeric" maxlength="6" placeholder="Código"></label><button class="primary" type="button" id="childLoginButton">Entrar na minha jornada</button><div id="childAccessStatus" class="save-status" aria-live="polite">'+message+'</div><p class="muted">O código ajuda a proteger a jornada de cada criança.</p></div></section>';
+  bindScreen();
+  document.querySelector("#childLoginButton").onclick=()=>{
+    const name=document.querySelector("#childAccessName").value.trim().toLowerCase();
+    const code=document.querySelector("#childAccessCode").value.trim();
+    const status=document.querySelector("#childAccessStatus");
+    const index=children.findIndex(c=>(c.name||"").trim().toLowerCase()===name && String(c.accessCode||"")===code);
+    if(index<0){status.textContent="Nome ou código de acesso incorretos.";return;}
+    activeChildIndex=index;
+    childJourneyActivities=(children[index].assigned||[]).map(title=>activities.find(x=>x.title===title)).filter(Boolean);
+    childProgress=0;
+    app.innerHTML=childScreen();
+    bindScreen();
+    if(childJourneyActivities.length)renderChildActivity();else document.querySelector("#childActivity").innerHTML='<article class="activity-player"><div class="finish-icon">🩺</div><h2>Jornada ainda não preparada</h2><p>A fono ainda não escolheu as atividades para você. Peça ajuda para ela preparar sua jornada.</p></article>';
+  };
+}
 function childScreen(){
-  return '<section class="screen child-screen"><button class="back" data-home>← Voltar</button><div class="child-title"><span class="sparkle">🌟</span><div><span class="eyebrow">Minha Jornada</span><h1>Vamos brincar?</h1><p>Hoje você tem atividades preparadas pela sua fono.</p></div></div><div id="childActivity"></div><div class="card child-progress-card"><div class="progress-top"><strong>⭐ Minha jornada</strong><span id="journeyLabel">0 de '+activities.length+'</span></div><div class="progress"><span id="progressBar"></span></div><p id="journeyMessage">Faça com calma. Tente, escute e divirta-se!</p></div></section>';
+  const c=children[activeChildIndex]||{};
+  return '<section class="screen child-screen"><button class="back" data-home>← Sair</button><div class="child-title"><span class="sparkle">🌟</span><div><span class="eyebrow">Minha Jornada</span><h1>Olá, '+c.name+'!</h1><p>Estas são as atividades preparadas pela sua fono.</p></div></div><div id="childActivity"></div><div class="card child-progress-card"><div class="progress-top"><strong>⭐ Minha jornada</strong><span id="journeyLabel">0 de '+childJourneyActivities.length+'</span></div><div class="progress"><span id="progressBar"></span></div><p id="journeyMessage">Faça com calma. Tente, escute e divirta-se!</p></div></section>';
 }
 
 function renderChildActivity(){
-  const a=activities[childProgress%activities.length];
+  const a=childJourneyActivities[childProgress];
+  if(!a)return;
   const content=a.kind==="name"
     ?'<div class="play-choices"><button class="play-choice" data-answer="certo">🐸<span>Sapo</span></button><button class="play-choice" data-answer="outro">🐶<span>Cachorro</span></button></div>'
     :a.kind==="rhyme"
@@ -234,17 +254,17 @@ function finishChildActivity(correct){
   const bar=document.querySelector("#progressBar");
   const label=document.querySelector("#journeyLabel");
   const message=document.querySelector("#journeyMessage");
-  if(bar)bar.style.width=Math.min(childProgress/activities.length*100,100)+"%";
-  if(label)label.textContent=Math.min(childProgress,activities.length)+" de "+activities.length;
-  if(message)message.textContent=childProgress>=activities.length?"Jornada de demonstração concluída!":"Pronto para a próxima?";
+  if(bar)bar.style.width=Math.min(childProgress/childJourneyActivities.length*100,100)+"%";
+  if(label)label.textContent=Math.min(childProgress,childJourneyActivities.length)+" de "+childJourneyActivities.length;
+  if(message)message.textContent=childProgress>=childJourneyActivities.length?"Jornada concluída!":"Pronto para a próxima?";
   setTimeout(()=>{
-    if(childProgress<activities.length){renderChildActivity()}
+    if(childProgress<childJourneyActivities.length){renderChildActivity()}
     else{
       document.querySelector("#childActivity").innerHTML='<article class="activity-player journey-finished"><div class="finish-icon">🎉</div><h2>Você terminou!</h2><p>Parabéns por participar da jornada de hoje.</p><button class="primary" data-restart>Fazer novamente</button></article>';
       document.querySelector("[data-restart]").onclick=()=>{
         childProgress=0;renderChildActivity();
         document.querySelector("#progressBar").style.width="0%";
-        document.querySelector("#journeyLabel").textContent="0 de "+activities.length;
+        document.querySelector("#journeyLabel").textContent="0 de "+childJourneyActivities.length;
         document.querySelector("#journeyMessage").textContent="Faça com calma. Tente, escute e divirta-se!";
       };
     }
@@ -252,20 +272,23 @@ function finishChildActivity(correct){
 }
 
 function newChildForm(){
-  app.innerHTML='<section class="screen"><button class="back" data-professional>← Voltar</button><div class="card form-card"><span class="eyebrow">Cadastro</span><h1>Nova criança</h1><p>Cadastro inicial para organizar o acompanhamento.</p><label>Nome completo<input id="childName" maxlength="100" autocomplete="off" placeholder="Nome da criança"></label><label>Data de nascimento<input id="childBirthDate" type="date"></label><label>Idade<select id="childAge"><option>3 anos</option><option>4 anos</option><option>5 anos</option><option>6 anos</option><option>7 anos</option><option>8 anos</option><option>9 anos</option><option>10 anos</option><option>11 anos</option><option>12 anos</option></select></label><label>Responsável<input id="childGuardian" maxlength="100" placeholder="Nome do responsável"></label><label>Contato do responsável<input id="childContact" maxlength="40" placeholder="Telefone ou outro contato"></label><label>Escola / turma<input id="childSchool" maxlength="120" placeholder="Opcional"></label><label>Origem do encaminhamento<input id="childReferral" maxlength="120" placeholder="UBS, escola, pediatria..."></label><label>Nível de leitura<select id="childReadingLevel"><option value="nao-le">🌱 Ainda não lê</option><option value="comecando">🌿 Está começando a ler</option><option value="palavras">📖 Lê palavras</option><option value="textos">📚 Lê frases e textos</option></select></label><label>Objetivo inicial<select id="childGoal"><option>Linguagem e nomeação</option><option>Compreensão de linguagem</option><option>Consciência fonológica</option><option>Fala / sons da fala</option><option>Leitura e escrita</option><option>Comunicação social</option><option>Fluência</option><option>Voz</option><option>Orofacial</option><option>Outro objetivo</option></select></label><label>Observações iniciais<textarea id="childNotes" rows="5" maxlength="1000" placeholder="Informações relevantes..."></textarea></label><button class="primary" type="button" id="createChildButton">Criar cadastro</button><span id="createChildStatus" class="save-status" aria-live="polite"></span></div></section>';
+  app.innerHTML='<section class="screen"><button class="back" data-professional>← Voltar</button><div class="card form-card"><span class="eyebrow">Cadastro</span><h1>Nova criança</h1><p>Cadastro inicial para organizar o acompanhamento.</p><label>Nome completo<input id="childName" maxlength="100" autocomplete="off" placeholder="Nome da criança"></label><label>Data de nascimento<input id="childBirthDate" type="date"></label><label>Idade<select id="childAge"><option>3 anos</option><option>4 anos</option><option>5 anos</option><option>6 anos</option><option>7 anos</option><option>8 anos</option><option>9 anos</option><option>10 anos</option><option>11 anos</option><option>12 anos</option></select></label><label>Responsável<input id="childGuardian" maxlength="100" placeholder="Nome do responsável"></label><label>Contato do responsável<input id="childContact" maxlength="40" placeholder="Telefone ou outro contato"></label><label>Escola / turma<input id="childSchool" maxlength="120" placeholder="Opcional"></label><label>Origem do encaminhamento<input id="childReferral" maxlength="120" placeholder="UBS, escola, pediatria..."></label><label>Código de acesso da criança<input id="childAccessCode" inputmode="numeric" maxlength="6" pattern="[0-9]{4,6}" placeholder="Ex.: 1234" required></label><label>Nível de leitura<select id="childReadingLevel"><option value="nao-le">🌱 Ainda não lê</option><option value="comecando">🌿 Está começando a ler</option><option value="palavras">📖 Lê palavras</option><option value="textos">📚 Lê frases e textos</option></select></label><label>Objetivo inicial<select id="childGoal"><option>Linguagem e nomeação</option><option>Compreensão de linguagem</option><option>Consciência fonológica</option><option>Fala / sons da fala</option><option>Leitura e escrita</option><option>Comunicação social</option><option>Fluência</option><option>Voz</option><option>Orofacial</option><option>Outro objetivo</option></select></label><label>Observações iniciais<textarea id="childNotes" rows="5" maxlength="1000" placeholder="Informações relevantes..."></textarea></label><button class="primary" type="button" id="createChildButton">Criar cadastro</button><span id="createChildStatus" class="save-status" aria-live="polite"></span></div></section>';
   bindScreen();
   const button=document.querySelector("#createChildButton");
   if(!button)return;
   button.onclick=()=>{
     const name=document.querySelector("#childName").value.trim();
+    const accessCode=document.querySelector("#childAccessCode").value.trim();
     const status=document.querySelector("#createChildStatus");
     if(!name){
       status.textContent="Informe o nome da criança.";
       document.querySelector("#childName").focus();
       return;
     }
+    if(!/^\d{4,6}$/.test(accessCode)){ status.textContent="Crie um código numérico de 4 a 6 dígitos."; return; }
     children.push({
       name,
+      accessCode,
       birthDate:document.querySelector("#childBirthDate").value,
       age:document.querySelector("#childAge").value,
       guardian:document.querySelector("#childGuardian").value.trim(),
@@ -355,12 +378,7 @@ function showHome(){
   bindScreen();
 }
 
-function showChild(){
-  childProgress=0;
-  app.innerHTML=childScreen();
-  bindScreen();
-  renderChildActivity();
-}
+function showChild(){ childProgress=0; childJourneyActivities=[]; childAccessScreen(); }
 
 function showProfessional(){
   if(sessionStorage.getItem("fonoProfessionalAccess")!=="1"){

@@ -30,3 +30,4 @@ export function observeAuth(callback){ return auth ? onAuthStateChanged(auth,cal
 export async function login(email,password){ if(!auth) throw new Error("Firebase não configurado."); return signInWithEmailAndPassword(auth,email,password); }
 export async function register(email,password){ if(!auth) throw new Error("Firebase não configurado."); return createUserWithEmailAndPassword(auth,email,password); }
 export async function logout(){ if(auth) await signOut(auth); }
+

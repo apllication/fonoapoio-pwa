@@ -244,7 +244,33 @@ function finishChildActivity(correct){
 }
 
 function newChildForm(){
-  app.innerHTML='<section class="screen"><button class="back" data-professional>← Voltar</button><div class="card form-card"><span class="eyebrow">Cadastro</span><h1>Nova criança</h1><p>Cadastro inicial para organizar o acompanhamento. Nesta fase, os dados ficam somente nesta sessão.</p><label>Nome completo<input id="childName" maxlength="100" autocomplete="off" placeholder="Nome da criança"></label><label>Data de nascimento<input id="childBirthDate" type="date"></label><label>Idade<select id="childAge"><option>3 anos</option><option>4 anos</option><option>5 anos</option><option>6 anos</option><option>7 anos</option><option>8 anos</option><option>9 anos</option><option>10 anos</option><option>11 anos</option><option>12 anos</option></select></label><label>Responsável<input id="childGuardian" maxlength="100" placeholder="Nome do responsável"></label><label>Contato do responsável<input id="childContact" maxlength="40" placeholder="Telefone ou outro contato"></label><label>Escola / turma<input id="childSchool" maxlength="120" placeholder="Opcional"></label><label>Origem do encaminhamento<input id="childReferral" maxlength="120" placeholder="UBS, escola, pediatria..."></label><label>Objetivo inicial<select id="childGoal"><option>Linguagem e nomeação</option><option>Compreensão de linguagem</option><option>Consciência fonológica</option><option>Fala / sons da fala</option><option>Leitura e escrita</option><option>Comunicação social</option><option>Fluência</option><option>Voz</option><option>Orofacial</option><option>Outro objetivo</option></select></label><label>Observações iniciais<textarea id="childNotes" rows="5" maxlength="1000" placeholder="Informações relevantes para organizar o acompanhamento..."></textarea></label><button class="primary" type="button" data-create-child>Criar cadastro</button><span id="createChildStatus" class="save-status" aria-live="polite"></span></div></section>';
+  app.innerHTML='<section class="screen"><button class="back" data-professional>← Voltar</button><div class="card form-card"><span class="eyebrow">Cadastro</span><h1>Nova criança</h1><p>Cadastro inicial para organizar o acompanhamento.</p><label>Nome completo<input id="childName" maxlength="100" autocomplete="off" placeholder="Nome da criança"></label><label>Data de nascimento<input id="childBirthDate" type="date"></label><label>Idade<select id="childAge"><option>3 anos</option><option>4 anos</option><option>5 anos</option><option>6 anos</option><option>7 anos</option><option>8 anos</option><option>9 anos</option><option>10 anos</option><option>11 anos</option><option>12 anos</option></select></label><label>Responsável<input id="childGuardian" maxlength="100" placeholder="Nome do responsável"></label><label>Contato do responsável<input id="childContact" maxlength="40" placeholder="Telefone ou outro contato"></label><label>Escola / turma<input id="childSchool" maxlength="120" placeholder="Opcional"></label><label>Origem do encaminhamento<input id="childReferral" maxlength="120" placeholder="UBS, escola, pediatria..."></label><label>Objetivo inicial<select id="childGoal"><option>Linguagem e nomeação</option><option>Compreensão de linguagem</option><option>Consciência fonológica</option><option>Fala / sons da fala</option><option>Leitura e escrita</option><option>Comunicação social</option><option>Fluência</option><option>Voz</option><option>Orofacial</option><option>Outro objetivo</option></select></label><label>Observações iniciais<textarea id="childNotes" rows="5" maxlength="1000" placeholder="Informações relevantes..."></textarea></label><button class="primary" type="button" id="createChildButton">Criar cadastro</button><span id="createChildStatus" class="save-status" aria-live="polite"></span></div></section>';
+  bindScreen();
+  const button=document.querySelector("#createChildButton");
+  if(!button)return;
+  button.onclick=()=>{
+    const name=document.querySelector("#childName").value.trim();
+    const status=document.querySelector("#createChildStatus");
+    if(!name){
+      status.textContent="Informe o nome da criança.";
+      document.querySelector("#childName").focus();
+      return;
+    }
+    children.push({
+      name,
+      birthDate:document.querySelector("#childBirthDate").value,
+      age:document.querySelector("#childAge").value,
+      guardian:document.querySelector("#childGuardian").value.trim(),
+      contact:document.querySelector("#childContact").value.trim(),
+      school:document.querySelector("#childSchool").value.trim(),
+      referral:document.querySelector("#childReferral").value.trim(),
+      goal:document.querySelector("#childGoal").value,
+      notes:document.querySelector("#childNotes").value.trim(),
+      assigned:[]
+    });
+    status.textContent="✓ Cadastro criado com sucesso.";
+    setTimeout(showProfessional,300);
+  };
 }
 function childProfile(index){
   activeChildIndex=index;
@@ -302,34 +328,7 @@ function bindScreen(){
   document.querySelectorAll("[data-review]").forEach(b=>b.onclick=()=>reviewVoice(Number(b.dataset.review)));
   const add=document.querySelector("[data-add]");
   if(add)add.onclick=newChildForm;
-  const create=document.querySelector("[data-create-child]"); if(create) create.onclick=()=>{const n=document.querySelector("#childName");if(!n||!n.value.trim()){alert("Informe o nome da criança.");return;}children.push({name:n.value.trim(),birthDate:document.querySelector("#childBirthDate").value,age:document.querySelector("#childAge").value,guardian:document.querySelector("#childGuardian").value.trim(),contact:document.querySelector("#childContact").value.trim(),school:document.querySelector("#childSchool").value.trim(),referral:document.querySelector("#childReferral").value.trim(),goal:document.querySelector("#childGoal").value,notes:document.querySelector("#childNotes").value.trim(),assigned:[]});showProfessional();};
-  if(create){
-    create.addEventListener("click",event=>{
-      event.preventDefault();
-      const name=document.querySelector("#childName")?.value.trim();
-      const status=document.querySelector("#createChildStatus");
-      if(!name){
-        if(status)status.textContent="Informe o nome da criança.";
-        document.querySelector("#childName")?.focus();
-        return;
-      }
-      const child={
-        name,
-        birthDate:document.querySelector("#childBirthDate")?.value||"",
-        age:document.querySelector("#childAge")?.value||"",
-        guardian:document.querySelector("#childGuardian")?.value.trim()||"",
-        contact:document.querySelector("#childContact")?.value.trim()||"",
-        school:document.querySelector("#childSchool")?.value.trim()||"",
-        referral:document.querySelector("#childReferral")?.value.trim()||"",
-        goal:document.querySelector("#childGoal")?.value||"",
-        notes:document.querySelector("#childNotes")?.value.trim()||"",
-        assigned:[]
-      };
-      children.push(child);
-      if(status)status.textContent="✓ Cadastro criado com sucesso.";
-      setTimeout(showProfessional,250);
-    });
-  }
+
   const logoutButton=document.querySelector("[data-logout]");
   if(logoutButton)logoutButton.onclick=async()=>{await logout();showHome();};
   const save=document.querySelector("[data-save-journey]");

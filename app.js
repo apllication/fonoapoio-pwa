@@ -78,8 +78,8 @@ const activities=[
 ];
 
 let children=[
-  {name:"Ana (demo)",age:"5 anos",goal:"Linguagem e nomeação",readingLevel:"nao-le",accessCode:"1111",assigned:["Nomeando animais","Minha vez, sua vez"]},
-  {name:"Pedro (demo)",age:"7 anos",goal:"Consciência fonológica",readingLevel:"comecando",accessCode:"2222",assigned:["Rimas"]}
+  {name:"Ana (demo)",age:"5 anos",goal:"Linguagem e nomeação",readingLevel:"nao-le",accessCode:"1111",assigned:["Ouça e escolha a figura","História com imagens","Bata palmas para a palavra","Caça ao som inicial"]},
+  {name:"Pedro (demo)",age:"7 anos",goal:"Consciência fonológica",readingLevel:"comecando",accessCode:"2222",assigned:["Junte as sílabas","Ligue letra e som"]}
 ];
 
 let childProgress=0;
@@ -298,7 +298,7 @@ function newChildForm(){
       goal:document.querySelector("#childGoal").value,
       readingLevel:document.querySelector("#childReadingLevel").value,
       notes:document.querySelector("#childNotes").value.trim(),
-      assigned:activities.filter(a=>!a.readingLevel||a.readingLevel===document.querySelector("#childReadingLevel").value).slice(0,4).map(a=>a.title)
+      assigned:activities.filter(a=>a.readingLevel===document.querySelector("#childReadingLevel").value).slice(0,4).map(a=>a.title)
     });
     status.textContent="✓ Cadastro criado com sucesso.";
     setTimeout(showProfessional,300);

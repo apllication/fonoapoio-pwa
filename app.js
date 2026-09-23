@@ -1,4 +1,4 @@
-import { initFirebase, currentUser, observeAuth, login, register, logout } from "./firebase-client.js";
+import { initFirebase, currentUser, observeAuth, login, register, logout, ensureProfessionalProfile } from "./firebase-client.js";
 
 let fonoFirebaseReady=false;
 let fonoAuthUser=null;
@@ -304,6 +304,7 @@ function showProfessional(){
       authScreen();
       return;
     }
+    try{ await ensureProfessionalProfile(); }catch(error){ console.warn("Não foi possível criar o perfil profissional no Firestore.",error); }
     app.innerHTML=professionalScreen();
     bindScreen();
   });

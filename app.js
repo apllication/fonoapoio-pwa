@@ -66,12 +66,20 @@ const activities=[
  {title:"Sinônimos e sentidos",area:"Vocabulário",icon:"🔄",goal:"Flexibilidade lexical",kind:"name",age:"7–10 anos",instruction:"Encontre outra palavra que tenha sentido parecido."},
  {title:"Compreendi?",area:"Compreensão",icon:"👂",goal:"Compreensão auditiva",kind:"turn",age:"5–10 anos",instruction:"Escute a orientação e explique com suas palavras o que deve fazer."},
  {title:"Descrição misteriosa",area:"Linguagem",icon:"🕵️‍♀️",goal:"Descrição e inferência",kind:"turn",age:"6–10 anos",instruction:"Descreva um objeto sem dizer o nome para a outra pessoa descobrir."},
- {title:"História em sequência",area:"Linguagem",icon:"🧩",goal:"Organização narrativa",kind:"turn",age:"5–9 anos",instruction:"Organize os acontecimentos e conte a história na ordem."}
+ {title:"História em sequência",area:"Linguagem",icon:"🧩",goal:"Organização narrativa",kind:"turn",age:"5–9 anos",instruction:"Organize os acontecimentos e conte a história na ordem."},
+ {title:"Ouça e escolha a figura",area:"Pré-leitura",icon:"👂",goal:"Compreensão auditiva e associação",kind:"name",age:"3–6 anos",instruction:"Escute a palavra falada pela fono e escolha a figura correspondente.",readingLevel:"nao-le"},
+ {title:"História com imagens",area:"Pré-leitura",icon:"🖼️",goal:"Narrativa e compreensão",kind:"turn",age:"3–6 anos",instruction:"Observe as imagens, coloque na ordem e conte o que aconteceu.",readingLevel:"nao-le"},
+ {title:"Bata palmas para a palavra",area:"Pré-leitura",icon:"👏",goal:"Consciência silábica",kind:"rhyme",age:"4–7 anos",instruction:"Fale a palavra e bata palmas para cada parte.",readingLevel:"nao-le"},
+ {title:"Caça ao som inicial",area:"Pré-leitura",icon:"🔊",goal:"Consciência fonológica",kind:"rhyme",age:"4–7 anos",instruction:"Escute o som inicial e escolha a figura que começa igual.",readingLevel:"nao-le"},
+ {title:"Junte as sílabas",area:"Começando a ler",icon:"🧩",goal:"Fusão silábica",kind:"rhyme",age:"5–8 anos",instruction:"Junte as sílabas apresentadas e descubra a palavra.",readingLevel:"comecando"},
+ {title:"Ligue letra e som",area:"Começando a ler",icon:"🔤",goal:"Relação letra-som",kind:"name",age:"5–8 anos",instruction:"Escolha a letra que representa o som apresentado.",readingLevel:"comecando"},
+ {title:"Leia palavras simples",area:"Leitura",icon:"📖",goal:"Leitura de palavras",kind:"name",age:"6–9 anos",instruction:"Leia a palavra em voz alta para a fono.",readingLevel:"palavras"},
+ {title:"Leia e responda",area:"Leitura",icon:"📚",goal:"Compreensão leitora",kind:"turn",age:"7–12 anos",instruction:"Leia uma frase ou pequeno texto e responda às perguntas.",readingLevel:"textos"}
 ];
 
 let children=[
-  {name:"Ana (demo)",age:"5 anos",goal:"Linguagem e nomeação",assigned:["Diga o nome","Turnos de conversa"]},
-  {name:"Pedro (demo)",age:"7 anos",goal:"Consciência fonológica",assigned:["Rimas"]}
+  {name:"Ana (demo)",age:"5 anos",goal:"Linguagem e nomeação",readingLevel:"nao-le",assigned:["Diga o nome","Turnos de conversa"]},
+  {name:"Pedro (demo)",age:"7 anos",goal:"Consciência fonológica",readingLevel:"comecando",assigned:["Rimas"]}
 ];
 
 let childProgress=0;
@@ -244,7 +252,7 @@ function finishChildActivity(correct){
 }
 
 function newChildForm(){
-  app.innerHTML='<section class="screen"><button class="back" data-professional>← Voltar</button><div class="card form-card"><span class="eyebrow">Cadastro</span><h1>Nova criança</h1><p>Cadastro inicial para organizar o acompanhamento.</p><label>Nome completo<input id="childName" maxlength="100" autocomplete="off" placeholder="Nome da criança"></label><label>Data de nascimento<input id="childBirthDate" type="date"></label><label>Idade<select id="childAge"><option>3 anos</option><option>4 anos</option><option>5 anos</option><option>6 anos</option><option>7 anos</option><option>8 anos</option><option>9 anos</option><option>10 anos</option><option>11 anos</option><option>12 anos</option></select></label><label>Responsável<input id="childGuardian" maxlength="100" placeholder="Nome do responsável"></label><label>Contato do responsável<input id="childContact" maxlength="40" placeholder="Telefone ou outro contato"></label><label>Escola / turma<input id="childSchool" maxlength="120" placeholder="Opcional"></label><label>Origem do encaminhamento<input id="childReferral" maxlength="120" placeholder="UBS, escola, pediatria..."></label><label>Objetivo inicial<select id="childGoal"><option>Linguagem e nomeação</option><option>Compreensão de linguagem</option><option>Consciência fonológica</option><option>Fala / sons da fala</option><option>Leitura e escrita</option><option>Comunicação social</option><option>Fluência</option><option>Voz</option><option>Orofacial</option><option>Outro objetivo</option></select></label><label>Observações iniciais<textarea id="childNotes" rows="5" maxlength="1000" placeholder="Informações relevantes..."></textarea></label><button class="primary" type="button" id="createChildButton">Criar cadastro</button><span id="createChildStatus" class="save-status" aria-live="polite"></span></div></section>';
+  app.innerHTML='<section class="screen"><button class="back" data-professional>← Voltar</button><div class="card form-card"><span class="eyebrow">Cadastro</span><h1>Nova criança</h1><p>Cadastro inicial para organizar o acompanhamento.</p><label>Nome completo<input id="childName" maxlength="100" autocomplete="off" placeholder="Nome da criança"></label><label>Data de nascimento<input id="childBirthDate" type="date"></label><label>Idade<select id="childAge"><option>3 anos</option><option>4 anos</option><option>5 anos</option><option>6 anos</option><option>7 anos</option><option>8 anos</option><option>9 anos</option><option>10 anos</option><option>11 anos</option><option>12 anos</option></select></label><label>Responsável<input id="childGuardian" maxlength="100" placeholder="Nome do responsável"></label><label>Contato do responsável<input id="childContact" maxlength="40" placeholder="Telefone ou outro contato"></label><label>Escola / turma<input id="childSchool" maxlength="120" placeholder="Opcional"></label><label>Origem do encaminhamento<input id="childReferral" maxlength="120" placeholder="UBS, escola, pediatria..."></label><label>Nível de leitura<select id="childReadingLevel"><option value="nao-le">🌱 Ainda não lê</option><option value="comecando">🌿 Está começando a ler</option><option value="palavras">📖 Lê palavras</option><option value="textos">📚 Lê frases e textos</option></select></label><label>Objetivo inicial<select id="childGoal"><option>Linguagem e nomeação</option><option>Compreensão de linguagem</option><option>Consciência fonológica</option><option>Fala / sons da fala</option><option>Leitura e escrita</option><option>Comunicação social</option><option>Fluência</option><option>Voz</option><option>Orofacial</option><option>Outro objetivo</option></select></label><label>Observações iniciais<textarea id="childNotes" rows="5" maxlength="1000" placeholder="Informações relevantes..."></textarea></label><button class="primary" type="button" id="createChildButton">Criar cadastro</button><span id="createChildStatus" class="save-status" aria-live="polite"></span></div></section>';
   bindScreen();
   const button=document.querySelector("#createChildButton");
   if(!button)return;
@@ -265,6 +273,7 @@ function newChildForm(){
       school:document.querySelector("#childSchool").value.trim(),
       referral:document.querySelector("#childReferral").value.trim(),
       goal:document.querySelector("#childGoal").value,
+      readingLevel:document.querySelector("#childReadingLevel").value,
       notes:document.querySelector("#childNotes").value.trim(),
       assigned:[]
     });
@@ -277,7 +286,7 @@ function childProfile(index){
   const c=children[index];
   const assigned=new Set(c.assigned||[]);
   const choices=activities.map(a=>'<label class="activity-choice"><input type="checkbox" data-activity="'+a.title+'" '+(assigned.has(a.title)?"checked":"")+'><span>'+a.icon+' <b>'+a.title+'</b><small>'+a.area+' · '+a.goal+' · '+a.age+'</small><em>'+a.instruction+'</em></span></label>').join("");
-  const info='<div class="card"><h2>👤 Cadastro</h2><p><b>Nascimento:</b> '+(c.birthDate||"Não informado")+'</p><p><b>Responsável:</b> '+(c.guardian||"Não informado")+'</p><p><b>Contato:</b> '+(c.contact||"Não informado")+'</p><p><b>Escola:</b> '+(c.school||"Não informado")+'</p><p><b>Encaminhamento:</b> '+(c.referral||"Não informado")+'</p><p><b>Observações:</b> '+(c.notes||"Nenhuma")+'</p></div>';
+  const info='<div class="card"><h2>👤 Cadastro</h2><p><b>Nascimento:</b> '+(c.birthDate||"Não informado")+'</p><p><b>Responsável:</b> '+(c.guardian||"Não informado")+'</p><p><b>Contato:</b> '+(c.contact||"Não informado")+'</p><p><b>Escola:</b> '+(c.school||"Não informado")+'</p><p><b>Encaminhamento:</b> '+(c.referral||"Não informado")+'</p><p><b>Nível de leitura:</b> '+({"nao-le":"Ainda não lê","comecando":"Está começando a ler","palavras":"Lê palavras","textos":"Lê frases e textos"}[c.readingLevel]||"Não informado")+'</p><p><b>Observações:</b> '+(c.notes||"Nenhuma")+'</p></div>';
   app.innerHTML='<section class="screen"><button class="back" data-professional>← Área da fono</button><div class="profile-head"><div class="profile-avatar">🧒</div><div><span class="eyebrow">Perfil da criança</span><h1>'+c.name+'</h1><p>'+c.age+' · Meta: '+c.goal+'</p></div></div>'+info+'<div class="card"><h2>🎯 Objetivo e jornada</h2><p>Escolha as atividades que serão disponibilizadas para esta criança.</p><div id="activityChoices">'+choices+'</div><button class="primary" data-save-journey>Salvar jornada</button><span id="saveStatus" class="save-status" aria-live="polite"></span></div></section>';
   bindScreen();
 }

@@ -19,7 +19,7 @@ let recordingChunks=[];
 let recordingStartedAt=0;
 let recordingUrl=null;
 let speechRecognition=null;
-let lastRecording=null;\nlet voiceRecords=[];
+let lastRecording=null;\nlet voiceRecords=[];\nlet activeChildIndex=0;
 
 function normalizeSpeech(text){return (text||"").toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").replace(/[^a-z0-9 ]/g," ").replace(/\\s+/g," ").trim()}
 function recordingSupported(){return !!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia&&window.MediaRecorder)}
@@ -52,7 +52,7 @@ stream.getTracks().forEach(t=>t.stop());
 const blob=new Blob(recordingChunks,{type:recorder.mimeType||"audio/webm"});
 if(recordingUrl)URL.revokeObjectURL(recordingUrl);
 recordingUrl=URL.createObjectURL(blob);
-lastRecording={blob,duration:Math.max(1,Math.round((Date.now()-recordingStartedAt)/1000)),activity:a.title};
+lastRecording={blob,duration:Math.max(1,Math.round((Date.now()-recordingStartedAt)/1000))};
 const audio=document.querySelector("#recordAudio");
 audio.src=recordingUrl;
 audio.hidden=false;
@@ -81,7 +81,8 @@ speechRecognition.maxAlternatives=1;
 speechRecognition.onresult=e=>{
 const transcript=e.results[0][0].transcript||"";
 const normalized=normalizeSpeech(transcript);
-let result="Transcrição: “"+transcript+"”";\nvoiceRecords.unshift({activity:a.title,duration:lastRecording.duration,transcript,when:new Date().toLocaleString("pt-BR")});
+let result="Transcrição: “"+transcript+"”";
+voiceRecords.unshift({childIndex:activeChildIndex,activity:a.title,duration:lastRecording.duration,transcript,when:new Date().toLocaleString("pt-BR"),review:"Pendente"});
 if(a.kind==="name"||a.kind==="rhyme"){
 const expected=a.kind==="name"?"sapo":"gato";
 result+="<br><span class=\"analysis-note\">A palavra esperada nesta atividade é <b>"+expected+"</b>. Isso é apenas uma comparação automática do texto reconhecido.</span>";
@@ -126,4 +127,5 @@ if(message)message.textContent=childProgress>=activities.length?"Jornada de demo
 setTimeout(()=>{if(childProgress<activities.length){renderChildActivity()}else{document.querySelector("#childActivity").innerHTML='<article class="activity-player journey-finished"><div class="finish-icon">🎉</div><h2>Você terminou!</h2><p>Parabéns por participar da jornada de hoje.</p><button class="primary" data-restart>Fazer novamente</button></article>';document.querySelector("[data-restart]").onclick=()=>{childProgress=0;renderChildActivity();document.querySelector("#progressBar").style.width="0%";document.querySelector("#journeyLabel").textContent="0 de "+activities.length;document.querySelector("#journeyMessage").textContent="Faça com calma. Tente, escute e divirta-se!"}},450);
 }
 
-function professionalScreen(){\nlet list=children.map((c,i)=>"<div class=\"card patient\"><div class=\"patient-avatar\">🧒</div><div class=\"patient-info\"><strong>"+c.name+"</strong><small>"+c.age+" · Meta: "+c.goal+"</small></div><button class=\"secondary\" data-patient=\""+i+"\">Abrir perfil</button></div>").join("");\nlet acts=activities.map(a=>"<div><span>"+a.icon+"</span><span><b>"+a.title+"</b><small>"+a.area+" · "+a.goal+"</small></span></div>").join("");\nlet records=voiceRecords.length?voiceRecords.map(r=>"<div class=\"voice-record-item\"><b>🎙️ "+r.activity+"</b><small>"+r.when+" · "+r.duration+"s</small><p>"+(r.transcript||"Sem transcrição registrada.")+"</p></div>").join(""):"<p class=\"muted\">Nenhuma gravação desta demonstração ainda.</p>";\nreturn "<section class=\"screen\"><button class=\"back\" data-home>← Voltar</button><h1>Área da Fonoaudióloga</h1><p>Cadastre a criança, defina a meta e acompanhe as atividades.</p><div class=\"stats\"><div><b>"+children.length+"</b><small>Crianças</small></div><div><b>"+activities.length+"</b><small>Atividades</small></div><div><b>"+voiceRecords.length+"</b><small>Gravações</small></div></div><div class=\"section-head\"><h2>Minhas crianças</h2><button class=\"secondary\" data-add>+ Nova criança</button></div>"+list+"<div class=\"card voice-history\"><h2>🎙️ Registros de voz</h2><p>Revisão demonstrativa das tentativas. As gravações ainda não são armazenadas em servidor.</p>"+records+"</div><div class=\"card\"><strong>📚 Atividades disponíveis</strong><div class=\"mini-list\">"+acts+"</div></div></section>";\n};
+function professionalScreen(){
+let list=children.map((c,i)=>"<div class=\"card patient\"><div class=\"patient-avatar\">🧒</div><div class=\"patient-info\"><strong>"+c.name+"</strong><small>"+c.age+" · Meta: "+c.goal+"</small></div><button class=\"secondary\" data-patient=\""+i+"\">Abrir perfil</button></div>").join("");\nlet acts=activities.map(a=>"<div><span>"+a.icon+"</span><span><b>"+a.title+"</b><small>"+a.area+" · "+a.goal+"</small></span></div>").join("");\nlet records=voiceRecords.length?voiceRecords.map((r,ri)=>"<div class=\"voice-record-item\"><b>🎙️ "+r.activity+"</b><small>"+r.when+" · "+r.duration+"s</small><p>"+(r.transcript||"Sem transcrição registrada.")+"</p><span class=\"review-status\">"+r.review+"</span><button class=\"secondary small-btn\" data-review=\""+ri+"\">Registrar observação</button></div>").join(""):"<p class=\"muted\">Nenhuma gravação desta demonstração ainda.</p>";\nreturn "<section class=\"screen\"><button class=\"back\" data-home>← Voltar</button><h1>Área da Fonoaudióloga</h1><p>Cadastre a criança, defina a meta e acompanhe as atividades.</p><div class=\"stats\"><div><b>"+children.length+"</b><small>Crianças</small></div><div><b>"+activities.length+"</b><small>Atividades</small></div><div><b>"+voiceRecords.length+"</b><small>Gravações</small></div></div><div class=\"section-head\"><h2>Minhas crianças</h2><button class=\"secondary\" data-add>+ Nova criança</button></div>"+list+"<div class=\"card voice-history\"><h2>🎙️ Registros de voz</h2><p>Revisão demonstrativa das tentativas. As gravações ainda não são armazenadas em servidor.</p>"+records+"</div><div class=\"card\"><strong>📚 Atividades disponíveis</strong><div class=\"mini-list\">"+acts+"</div></div></section>";\n};

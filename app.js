@@ -251,7 +251,9 @@ function professionalScreen(){
   const list=children.map((c,i)=>'<div class="card patient"><div class="patient-avatar">🧒</div><div class="patient-info"><strong>'+c.name+'</strong><small>'+c.age+' · Meta: '+c.goal+'</small></div><button class="secondary" data-patient="'+i+'">Abrir perfil</button></div>').join("");
   const acts=activities.map(a=>'<div><span>'+a.icon+'</span><span><b>'+a.title+'</b><small>'+a.area+' · '+a.goal+'</small></span></div>').join("");
   const records=voiceRecords.length?voiceRecords.map((r,ri)=>'<div class="voice-record-item"><b>🎙️ '+r.activity+'</b><small>'+r.when+' · '+r.duration+'s</small><p>'+(r.transcript||"Sem transcrição registrada.")+'</p><span class="review-status">'+(r.review||"Pendente")+'</span><button class="secondary small-btn" data-review="'+ri+'">Registrar observação</button></div>').join(""):'<p class="muted">Nenhuma gravação desta demonstração ainda.</p>';
-  return '<section class="screen"><button class="back" data-home>← Voltar</button><h1>Área da Fonoaudióloga</h1><p>Cadastre a criança, defina a meta e acompanhe as atividades.</p><div class="stats"><div><b>'+children.length+'</b><small>Crianças</small></div><div><b>'+activities.length+'</b><small>Atividades</small></div><div><b>'+voiceRecords.length+'</b><small>Gravações</small></div></div><div class="section-head"><h2>Minhas crianças</h2><button class="secondary" data-add>+ Nova criança</button></div>'+list+'<div class="card voice-history"><h2>🎙️ Registros de voz</h2><p>Revisão demonstrativa. As gravações ainda não são armazenadas em servidor.</p>'+records+'</div><div class="card"><strong>📚 Atividades disponíveis</strong><div class="mini-list">'+acts+'</div></div></section>';
+  const user=currentUser();
+  const account=user?'<div class="card"><strong>🔐 Acesso seguro</strong><p>Conectada como <b>'+user.email+'</b>.</p><button class="secondary" data-logout>Sair</button></div>':"";
+  return account+'<section class="screen"><button class="back" data-home>← Voltar</button><h1>Área da Fonoaudióloga</h1><p>Cadastre a criança, defina a meta e acompanhe as atividades.</p><div class="stats"><div><b>'+children.length+'</b><small>Crianças</small></div><div><b>'+activities.length+'</b><small>Atividades</small></div><div><b>'+voiceRecords.length+'</b><small>Gravações</small></div></div><div class="section-head"><h2>Minhas crianças</h2><button class="secondary" data-add>+ Nova criança</button></div>'+list+'<div class="card voice-history"><h2>🎙️ Registros de voz</h2><p>Revisão demonstrativa. As gravações ainda não são armazenadas em servidor.</p>'+records+'</div><div class="card"><strong>📚 Atividades disponíveis</strong><div class="mini-list">'+acts+'</div></div></section>';
 }
 
 function bindScreen(){
@@ -269,6 +271,8 @@ function bindScreen(){
     children.push({name:name+" (demo)",age:document.querySelector("#childAge").value,goal:document.querySelector("#childGoal").value,assigned:[]});
     showProfessional();
   };
+  const logoutButton=document.querySelector("[data-logout]");
+  if(logoutButton)logoutButton.onclick=async()=>{await logout();showHome();};
   const save=document.querySelector("[data-save-journey]");
   if(save)save.onclick=()=>{
     children[activeChildIndex].assigned=[...document.querySelectorAll("[data-activity]:checked")].map(x=>x.dataset.activity);
@@ -291,31 +295,18 @@ function showChild(){
 }
 
 function showProfessional(){
-  app.innerHTML=professionalScreen();
-  bindScreen();
+  setupFirebaseAuth().then(()=>{
+    if(!fonoFirebaseReady){
+      authScreen("O Firebase ainda não foi configurado. Por enquanto, o projeto permanece em modo demonstração.");
+      return;
+    }
+    if(!currentUser()){
+      authScreen();
+      return;
+    }
+    app.innerHTML=professionalScreen();
+    bindScreen();
+  });
 }
-
 showHome();
-
-const originalProfessionalScreen=professionalScreen;
-function professionalScreen(){
-  const base=originalProfessionalScreen();
-  const user=currentUser();
-  const account=user ? '<div class="card"><strong>🔐 Acesso seguro</strong><p>Conectada como <b>'+user.email+'</b>.</p><button class="secondary" data-logout>Sair</button></div>' : '';
-  return account+base;
-}
-const originalBindScreen=bindScreen;
-function bindScreen(){
-  originalBindScreen();
-  const logoutButton=document.querySelector("[data-logout]");
-  if(logoutButton) logoutButton.onclick=async()=>{await logout();showHome();};
-}
-const originalShowProfessional=showProfessional;
-async function showProfessional(){
-  await setupFirebaseAuth();
-  if(!fonoFirebaseReady){authScreen("O Firebase ainda não foi configurado. Por enquanto, o projeto permanece em modo demonstração.");return;}
-  if(!currentUser()){authScreen();return;}
-  originalShowProfessional();
-  bindScreen();
-}
 setupFirebaseAuth();

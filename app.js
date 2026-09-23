@@ -302,7 +302,7 @@ function bindScreen(){
   document.querySelectorAll("[data-review]").forEach(b=>b.onclick=()=>reviewVoice(Number(b.dataset.review)));
   const add=document.querySelector("[data-add]");
   if(add)add.onclick=newChildForm;
-  const create=document.querySelector("[data-create-child]");
+  const create=document.querySelector("[data-create-child]"); if(create) create.onclick=()=>{const n=document.querySelector("#childName");if(!n||!n.value.trim()){alert("Informe o nome da criança.");return;}children.push({name:n.value.trim(),birthDate:document.querySelector("#childBirthDate").value,age:document.querySelector("#childAge").value,guardian:document.querySelector("#childGuardian").value.trim(),contact:document.querySelector("#childContact").value.trim(),school:document.querySelector("#childSchool").value.trim(),referral:document.querySelector("#childReferral").value.trim(),goal:document.querySelector("#childGoal").value,notes:document.querySelector("#childNotes").value.trim(),assigned:[]});showProfessional();};
   if(create){
     create.addEventListener("click",event=>{
       event.preventDefault();

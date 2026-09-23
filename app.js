@@ -276,7 +276,7 @@ function professionalScreen(){
 
 function bindScreen(){
   document.querySelectorAll("[data-home]").forEach(b=>b.onclick=showHome);
-  document.querySelectorAll("[data-professional]").forEach(b=>showProfessional);
+  document.querySelectorAll("[data-professional]").forEach(b=>b.onclick=showProfessional);
   bindAssessment();
   document.querySelector("[data-assessment-home]")?.addEventListener("click",()=>{app.innerHTML=assessmentScreen();bindScreen();});
   document.querySelectorAll("[data-role]").forEach(b=>b.onclick=()=>b.dataset.role==="child"?showChild():showProfessional());

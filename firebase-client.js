@@ -1,8 +1,10 @@
 // Integração opcional do Firebase para o FonoApoio UBS.
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
 import { getAuth, browserLocalPersistence, setPersistence, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, addDoc, collection, getDocs, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
 let auth=null;
+let db=null;
 let configured=false;
 
 function validConfig(config){
@@ -17,9 +19,10 @@ export async function initFirebase(){
   try{
     const app=initializeApp(config);
     auth=getAuth(app);
+    db=getFirestore(app);
     await setPersistence(auth,browserLocalPersistence);
     configured=true;
-    return {configured:true,auth};
+    return {configured:true,auth,db};
   }catch(error){
     console.error("Falha ao iniciar Firebase",error);
     return {configured:false,auth:null,error};

@@ -298,7 +298,7 @@ function newChildForm(){
       goal:document.querySelector("#childGoal").value,
       readingLevel:document.querySelector("#childReadingLevel").value,
       notes:document.querySelector("#childNotes").value.trim(),
-      assigned:[]
+      assigned:activities.filter(a=>!a.readingLevel||a.readingLevel===document.querySelector("#childReadingLevel").value).slice(0,4).map(a=>a.title)
     });
     status.textContent="✓ Cadastro criado com sucesso.";
     setTimeout(showProfessional,300);

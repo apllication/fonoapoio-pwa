@@ -244,23 +244,16 @@ function finishChildActivity(correct){
 }
 
 function newChildForm(){
-  app.innerHTML='<section class="screen"><button class="back" data-professional>← Voltar</button><div class="card form-card"><h1>Nova criança</h1><p>Esta versão ainda usa dados demonstrativos, armazenados somente durante a sessão.</p><label>Nome<input id="childName" maxlength="80" autocomplete="off" placeholder="Nome da criança"></label><label>Idade<select id="childAge"><option>3 anos</option><option>4 anos</option><option>5 anos</option><option>6 anos</option><option>7 anos</option><option>8 anos</option><option>9 anos</option><option>10 anos</option></select></label><label>Objetivo inicial<select id="childGoal"><option>Linguagem e nomeação</option><option>Consciência fonológica</option><option>Comunicação</option><option>Outro objetivo</option></select></label><button class="primary" data-create-child>Criar perfil demonstrativo</button></div></section>';
+  app.innerHTML='<section class="screen"><button class="back" data-professional>← Voltar</button><div class="card form-card"><span class="eyebrow">Cadastro</span><h1>Nova criança</h1><p>Cadastro inicial para organizar o acompanhamento. Nesta fase, os dados ficam somente nesta sessão.</p><label>Nome completo<input id="childName" maxlength="100" autocomplete="off" placeholder="Nome da criança"></label><label>Data de nascimento<input id="childBirthDate" type="date"></label><label>Idade<select id="childAge"><option>3 anos</option><option>4 anos</option><option>5 anos</option><option>6 anos</option><option>7 anos</option><option>8 anos</option><option>9 anos</option><option>10 anos</option><option>11 anos</option><option>12 anos</option></select></label><label>Responsável<input id="childGuardian" maxlength="100" placeholder="Nome do responsável"></label><label>Contato do responsável<input id="childContact" maxlength="40" placeholder="Telefone ou outro contato"></label><label>Escola / turma<input id="childSchool" maxlength="120" placeholder="Opcional"></label><label>Origem do encaminhamento<input id="childReferral" maxlength="120" placeholder="UBS, escola, pediatria..."></label><label>Objetivo inicial<select id="childGoal"><option>Linguagem e nomeação</option><option>Compreensão de linguagem</option><option>Consciência fonológica</option><option>Fala / sons da fala</option><option>Leitura e escrita</option><option>Comunicação social</option><option>Fluência</option><option>Voz</option><option>Orofacial</option><option>Outro objetivo</option></select></label><label>Observações iniciais<textarea id="childNotes" rows="5" maxlength="1000" placeholder="Informações relevantes para organizar o acompanhamento..."></textarea></label><button class="primary" data-create-child>Criar cadastro</button></div></section>';
 }
-
 function childProfile(index){
   activeChildIndex=index;
   const c=children[index];
   const assigned=new Set(c.assigned||[]);
-  const choices=activities.map(a=>'<label class="activity-choice"><input type="checkbox" data-activity="'+a.title+'" '+(assigned.has(a.title)?"checked":"")+'><span>'+a.icon+' <b>'+a.title+'</b><small>'+a.area+' · '+a.goal+'</small></span></label>').join("");
-  const history=voiceRecords.filter(r=>r.childIndex===index);
-  const historyHtml=history.length?history.map((r,ri)=>{
-    const realIndex=voiceRecords.indexOf(r);
-    return '<div class="voice-record-item"><b>🎙️ '+r.activity+'</b><small>'+r.when+' · '+r.duration+'s</small><p>'+(r.transcript||"Sem transcrição registrada.")+'</p><span class="review-status">'+(r.review||"Pendente")+'</span><button class="secondary small-btn" data-review="'+realIndex+'">Registrar observação</button></div>';
-  }).join(""):'<p class="muted">Nenhuma tentativa registrada para esta criança.</p>';
-
-  app.innerHTML='<section class="screen"><button class="back" data-professional>← Área da fono</button><div class="profile-head"><div class="profile-avatar">🧒</div><div><h1>'+c.name+'</h1><p>'+c.age+' · Meta: '+c.goal+'</p></div></div><div class="card"><h2>🎯 Objetivo e jornada</h2><p>Selecione as atividades que a fono deseja disponibilizar para esta criança.</p><div id="activityChoices">'+choices+'</div><button class="primary" data-save-journey>Salvar jornada</button><span id="saveStatus" class="save-status" aria-live="polite"></span></div><div class="card voice-history"><h2>🎙️ Histórico de voz</h2><p>'+history.length+' tentativa(s) registrada(s) nesta demonstração.</p>'+historyHtml+'</div></section>';
+  const choices=activities.map(a=>'<label class="activity-choice"><input type="checkbox" data-activity="'+a.title+'" '+(assigned.has(a.title)?"checked":"")+'><span>'+a.icon+' <b>'+a.title+'</b><small>'+a.area+' · '+a.goal+' · '+a.age+'</small><em>'+a.instruction+'</em></span></label>').join("");
+  const info='<div class="card"><h2>👤 Cadastro</h2><p><b>Nascimento:</b> '+(c.birthDate||"Não informado")+'</p><p><b>Responsável:</b> '+(c.guardian||"Não informado")+'</p><p><b>Contato:</b> '+(c.contact||"Não informado")+'</p><p><b>Escola:</b> '+(c.school||"Não informado")+'</p><p><b>Encaminhamento:</b> '+(c.referral||"Não informado")+'</p><p><b>Observações:</b> '+(c.notes||"Nenhuma")+'</p></div>';
+  app.innerHTML='<section class="screen"><button class="back" data-professional>← Área da fono</button><div class="profile-head"><div class="profile-avatar">🧒</div><div><span class="eyebrow">Perfil da criança</span><h1>'+c.name+'</h1><p>'+c.age+' · Meta: '+c.goal+'</p></div></div>'+info+'<div class="card"><h2>🎯 Objetivo e jornada</h2><p>Escolha as atividades que serão disponibilizadas para esta criança.</p><div id="activityChoices">'+choices+'</div><button class="primary" data-save-journey>Salvar jornada</button><span id="saveStatus" class="save-status" aria-live="polite"></span></div></section>';
 }
-
 function reviewVoice(index){
   const r=voiceRecords[index];
   if(!r)return;
@@ -313,7 +306,7 @@ function bindScreen(){
   if(create)create.onclick=()=>{
     const name=document.querySelector("#childName").value.trim();
     if(!name){alert("Informe o nome da criança.");return;}
-    children.push({name:name+" (demo)",age:document.querySelector("#childAge").value,goal:document.querySelector("#childGoal").value,assigned:[]});
+    children.push({name,birthDate:document.querySelector("#childBirthDate").value,age:document.querySelector("#childAge").value,guardian:document.querySelector("#childGuardian").value.trim(),contact:document.querySelector("#childContact").value.trim(),school:document.querySelector("#childSchool").value.trim(),referral:document.querySelector("#childReferral").value.trim(),goal:document.querySelector("#childGoal").value,notes:document.querySelector("#childNotes").value.trim(),assigned:[]});
     showProfessional();
   };
   const logoutButton=document.querySelector("[data-logout]");

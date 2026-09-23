@@ -1,0 +1,26 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isProfessionalOwner(childId) {
+      return signedIn() &&
+        get(/databases/(default)/documents/children/$(childId)).data.professionalId == request.auth.uid;
+    }
+
+    match /professionals/{uid}/children/{childId}/voice/{fileName} {
+      allow read: if isProfessionalOwner(childId);
+      allow write: if isProfessionalOwner(childId)
+        && request.resource.size < 50 * 1024 * 1024
+        && request.resource.contentType.matches('audio/.*');
+      allow delete: if isProfessionalOwner(childId);
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

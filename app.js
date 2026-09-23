@@ -249,7 +249,8 @@ function reviewVoice(index){
 
 function professionalScreen(){
   const list=children.map((c,i)=>'<div class="card patient"><div class="patient-avatar">🧒</div><div class="patient-info"><strong>'+c.name+'</strong><small>'+c.age+' · Meta: '+c.goal+'</small></div><button class="secondary" data-patient="'+i+'">Abrir perfil</button></div>').join("");
-  const assessmentButton="<button class=\"primary\" data-assessment-home>Abrir avaliação estruturada</button>";\n  const acts=activities.map(a=>'<div><span>'+a.icon+'</span><span><b>'+a.title+'</b><small>'+a.area+' · '+a.goal+'</small></span></div>').join("");
+  const assessmentButton="<button class=\"primary\" data-assessment-home>Abrir avaliação estruturada</button>";
+  const acts=activities.map(a=>'<div><span>'+a.icon+'</span><span><b>'+a.title+'</b><small>'+a.area+' · '+a.goal+'</small></span></div>').join("");
   const records=voiceRecords.length?voiceRecords.map((r,ri)=>'<div class="voice-record-item"><b>🎙️ '+r.activity+'</b><small>'+r.when+' · '+r.duration+'s</small><p>'+(r.transcript||"Sem transcrição registrada.")+'</p><span class="review-status">'+(r.review||"Pendente")+'</span><button class="secondary small-btn" data-review="'+ri+'">Registrar observação</button></div>').join(""):'<p class="muted">Nenhuma gravação desta demonstração ainda.</p>';
   const user=currentUser();
   const account=user?'<div class="card"><strong>🔐 Acesso seguro</strong><p>Conectada como <b>'+user.email+'</b>.</p><button class="secondary" data-logout>Sair</button></div>':"";

@@ -22,7 +22,7 @@ function authScreen(message=""){
     const {email,password}=credentials();
     if(!email||password.length<6){status.textContent="Informe um e-mail e uma senha com pelo menos 6 caracteres.";return;}
     status.textContent="Entrando...";
-    try{await login(email,password);showProfessional();}catch(error){status.textContent="Não foi possível entrar. Confira o e-mail e a senha.";console.warn(error);}
+    try{await login(email,password);showProfessional();}catch(error){console.warn("Erro de login Firebase:",error); const messages={"auth/invalid-credential":"E-mail ou senha incorretos.","auth/user-not-found":"Este e-mail ainda não possui uma conta profissional.","auth/wrong-password":"Senha incorreta.","auth/invalid-email":"O e-mail informado é inválido.","auth/too-many-requests":"Muitas tentativas. Aguarde alguns minutos e tente novamente.","auth/operation-not-allowed":"O login por E-mail/Senha ainda não está ativado no Firebase."}; status.textContent=messages[error?.code]||`Não foi possível entrar (${error?.code||"erro desconhecido"}).`;}
   };
   document.querySelector("[data-register]").onclick=async()=>{
     const {email,password}=credentials();

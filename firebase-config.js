@@ -1,9 +1,12 @@
-// Configuração Web do Firebase. Substitua os valores pelo config do seu projeto.
+// Configuração Web do Firebase do FonoApoio UBS.
+// Estes dados identificam o aplicativo Web; a proteção dos dados é feita pelas regras
+// do Firebase Authentication, Firestore e Storage.
 window.FONOApoioFirebaseConfig = {
-  apiKey: "COLOQUE_AQUI",
-  authDomain: "SEU-PROJETO.firebaseapp.com",
-  projectId: "SEU-PROJETO",
-  storageBucket: "SEU-PROJETO.firebasestorage.app",
-  messagingSenderId: "COLOQUE_AQUI",
-  appId: "COLOQUE_AQUI"
+  apiKey: "AIzaSyCJyL7icOndgSgHyHDOImRDBebmxnnEVM",
+  authDomain: "fonoapoio-f03ef.firebaseapp.com",
+  projectId: "fonoapoio-f03ef",
+  storageBucket: "fonoapoio-f03ef.firebasestorage.app",
+  messagingSenderId: "946227878435",
+  appId: "1:946227878435:web:db24c9632e9e608bd56f96",
+  measurementId: "G-E8DTY8TY0N"
 };

@@ -279,6 +279,7 @@ function childProfile(index){
   const choices=activities.map(a=>'<label class="activity-choice"><input type="checkbox" data-activity="'+a.title+'" '+(assigned.has(a.title)?"checked":"")+'><span>'+a.icon+' <b>'+a.title+'</b><small>'+a.area+' · '+a.goal+' · '+a.age+'</small><em>'+a.instruction+'</em></span></label>').join("");
   const info='<div class="card"><h2>👤 Cadastro</h2><p><b>Nascimento:</b> '+(c.birthDate||"Não informado")+'</p><p><b>Responsável:</b> '+(c.guardian||"Não informado")+'</p><p><b>Contato:</b> '+(c.contact||"Não informado")+'</p><p><b>Escola:</b> '+(c.school||"Não informado")+'</p><p><b>Encaminhamento:</b> '+(c.referral||"Não informado")+'</p><p><b>Observações:</b> '+(c.notes||"Nenhuma")+'</p></div>';
   app.innerHTML='<section class="screen"><button class="back" data-professional>← Área da fono</button><div class="profile-head"><div class="profile-avatar">🧒</div><div><span class="eyebrow">Perfil da criança</span><h1>'+c.name+'</h1><p>'+c.age+' · Meta: '+c.goal+'</p></div></div>'+info+'<div class="card"><h2>🎯 Objetivo e jornada</h2><p>Escolha as atividades que serão disponibilizadas para esta criança.</p><div id="activityChoices">'+choices+'</div><button class="primary" data-save-journey>Salvar jornada</button><span id="saveStatus" class="save-status" aria-live="polite"></span></div></section>';
+  bindScreen();
 }
 function reviewVoice(index){
   const r=voiceRecords[index];

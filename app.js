@@ -13,22 +13,22 @@ async function setupFirebaseAuth(){
   observeAuth(user=>{ fonoAuthUser=user||null; });
 }
 
+const PROFESSIONAL_CODE="mav";
+const PROFESSIONAL_PASSWORD="256185";
+
 function authScreen(message=""){
-  app.innerHTML='<section class="screen"><button class="back" data-home>← Voltar</button><div class="card form-card"><span class="eyebrow">Acesso profissional</span><h1>Área da fonoaudióloga</h1><p>Entre com seu e-mail e senha. O acesso profissional é separado da jornada da criança.</p><label>E-mail<input id="authEmail" type="email" autocomplete="email" placeholder="seu@email.com"></label><label>Senha<input id="authPassword" type="password" autocomplete="current-password" placeholder="Sua senha"></label><button class="primary" data-login>Entrar</button><button class="secondary" data-register>Criar acesso profissional</button><div id="authStatus" class="save-status" aria-live="polite">${message}</div><p class="muted">Os dados reais só devem ser usados depois que o Firebase estiver configurado e as regras de segurança forem publicadas.</p></div></section>';
+  app.innerHTML='<section class="screen"><button class="back" data-home>← Voltar</button><div class="card form-card"><span class="eyebrow">Acesso profissional</span><h1>Área da fonoaudióloga</h1><p>Entre com seu código e senha para acessar a área profissional.</p><label>Código<input id="authCode" type="text" autocomplete="username" placeholder="Seu código"></label><label>Senha<input id="authPassword" type="password" autocomplete="current-password" placeholder="Sua senha"></label><button class="primary" data-login>Entrar</button><div id="authStatus" class="save-status" aria-live="polite">\${message}</div><p class="muted">Acesso local de demonstração. Para uso com dados reais de crianças, será necessário ativar uma autenticação segura no servidor.</p></div></section>';
   bindScreen();
   const status=document.querySelector("#authStatus");
-  const credentials=()=>({email:document.querySelector("#authEmail").value.trim(),password:document.querySelector("#authPassword").value});
-  document.querySelector("[data-login]").onclick=async()=>{
-    const {email,password}=credentials();
-    if(!email||password.length<6){status.textContent="Informe um e-mail e uma senha com pelo menos 6 caracteres.";return;}
-    status.textContent="Entrando...";
-    try{await login(email,password);showProfessional();}catch(error){console.warn("Erro de login Firebase:",error); const messages={"auth/invalid-credential":"E-mail ou senha incorretos.","auth/user-not-found":"Este e-mail ainda não possui uma conta profissional.","auth/wrong-password":"Senha incorreta.","auth/invalid-email":"O e-mail informado é inválido.","auth/too-many-requests":"Muitas tentativas. Aguarde alguns minutos e tente novamente.","auth/operation-not-allowed":"O login por E-mail/Senha ainda não está ativado no Firebase."}; status.textContent=messages[error?.code]||`Não foi possível entrar (${error?.code||"erro desconhecido"}).`;}
-  };
-  document.querySelector("[data-register]").onclick=async()=>{
-    const {email,password}=credentials();
-    if(!email||password.length<6){status.textContent="Informe um e-mail e uma senha com pelo menos 6 caracteres.";return;}
-    status.textContent="Criando acesso...";
-    try{await register(email,password);showProfessional();}catch(error){status.textContent="Não foi possível criar o acesso. Verifique se E-mail/Senha está habilitado no Firebase.";console.warn(error);}
+  document.querySelector("[data-login]").onclick=()=>{
+    const code=document.querySelector("#authCode").value.trim().toLowerCase();
+    const password=document.querySelector("#authPassword").value;
+    if(code===PROFESSIONAL_CODE && password===PROFESSIONAL_PASSWORD){
+      sessionStorage.setItem("fonoProfessionalAccess","1");
+      showProfessional();
+    }else{
+      status.textContent="Código ou senha incorretos.";
+    }
   };
 }
 const app=document.querySelector("#app");

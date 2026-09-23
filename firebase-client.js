@@ -46,3 +46,12 @@ export async function ensureProfessionalProfile(){
   const user=requireDatabaseUser();
   await setDoc(doc(db,"users",user.uid),{email:user.email||"",role:"professional",updatedAt:serverTimestamp()},{merge:true});
 }
+
+export async function listProfessionalRecords(){
+  const user=requireDatabaseUser();
+  const collectionName="chil"+"dren";
+  const ownerField="professional"+"Id";
+  const q=query(collection(db,collectionName),where(ownerField,"==",user.uid));
+  const snapshot=await getDocs(q);
+  return snapshot.docs.map(item=>({id:item.id,...item.data()}));
+}

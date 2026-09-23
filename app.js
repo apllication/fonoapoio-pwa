@@ -295,18 +295,13 @@ function showChild(){
 }
 
 function showProfessional(){
-  setupFirebaseAuth().then(()=>{
-    if(!fonoFirebaseReady){
-      authScreen("O Firebase ainda não foi configurado. Por enquanto, o projeto permanece em modo demonstração.");
-      return;
-    }
-    if(!currentUser()){
-      authScreen();
-      return;
-    }
-    app.innerHTML=professionalScreen();
-    bindScreen();
-  });
+  if(sessionStorage.getItem("fonoProfessionalAccess")!=="1"){
+    authScreen();
+    return;
+  }
+  app.innerHTML=professionalScreen();
+  bindScreen();
 }
+
 showHome();
 setupFirebaseAuth();

@@ -20,6 +20,7 @@ let recordingStartedAt=0;
 let recordingUrl=null;
 let speechRecognition=null;
 let lastRecording=null;\nlet voiceRecords=[];\nlet activeChildIndex=0;
+let observationDrafts={};
 
 function normalizeSpeech(text){return (text||"").toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").replace(/[^a-z0-9 ]/g," ").replace(/\\s+/g," ").trim()}
 function recordingSupported(){return !!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia&&window.MediaRecorder)}
